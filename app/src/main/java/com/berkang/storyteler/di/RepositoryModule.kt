@@ -1,6 +1,7 @@
 package com.berkang.storyteler.di
 
 import com.berkang.storyteler.data.repository.CharacterRepositoryImpl
+import com.berkang.storyteler.data.repository.FakeStoryRepository
 import com.berkang.storyteler.data.repository.StoryRepositoryImpl
 import com.berkang.storyteler.domain.repository.CharacterRepository
 import com.berkang.storyteler.domain.repository.StoryRepository
@@ -23,6 +24,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindStoryRepository(
-        storyRepositoryImpl: StoryRepositoryImpl
+        fakeStoryRepository: FakeStoryRepository
     ): StoryRepository
 }
