@@ -1,4 +1,4 @@
-# StoryTeler - AI Destekli Masal Anlatıcısı
+# TaleForge - AI Destekli Masal Anlatıcısı
 
 Android uygulaması olarak geliştirilmiş, yapay zeka destekli kişiselleştirilmiş masal anlatıcısı.
 
@@ -50,7 +50,7 @@ app/src/main/java/com/berkang/storyteler/
 
 1. Projeyi klonlayın:
 ```bash
-git clone https://github.com/[username]/StoryTeler.git
+git clone https://github.com/BerkanGulyagci/TaleForge.git
 ```
 
 2. Android Studio'da açın
@@ -97,7 +97,7 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 ## 👨‍💻 Geliştirici
 
-**Berkan** - [GitHub Profili](https://github.com/[username])
+**Berkan Gülyağcı** - [GitHub Profili](https://github.com/BerkanGulyagci)
 
 ---
 
