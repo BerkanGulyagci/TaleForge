@@ -2,10 +2,22 @@ package com.berkang.storyteler.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Modern, çocuk dostu renk paleti
+val SoftIndigo = Color(0xFF6B73FF)
+val SoftIndigoLight = Color(0xFF9BA3FF)
+val SoftIndigoDark = Color(0xFF4A52CC)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val MintAqua = Color(0xFF4DD0E1)
+val MintAquaLight = Color(0xFF80DEEA)
+val MintAquaDark = Color(0xFF26A69A)
+
+val WarmYellow = Color(0xFFFFC947)
+val WarmYellowLight = Color(0xFFFFD54F)
+val WarmYellowDark = Color(0xFFFFB300)
+
+val Peach = Color(0xFFFFAB91)
+val PeachLight = Color(0xFFFFCCBC)
+val PeachDark = Color(0xFFFF8A65)
+
+val BackgroundTint = Color(0xFFF8F9FF)
+val SurfaceTint = Color(0xFFF0F2FF)

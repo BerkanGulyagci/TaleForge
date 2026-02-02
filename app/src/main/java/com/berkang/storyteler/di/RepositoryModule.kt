@@ -5,6 +5,8 @@ import com.berkang.storyteler.data.repository.FakeStoryRepository
 import com.berkang.storyteler.data.repository.StoryRepositoryImpl
 import com.berkang.storyteler.domain.repository.CharacterRepository
 import com.berkang.storyteler.domain.repository.StoryRepository
+import com.berkang.storyteler.data.repository.StoryHistoryRepositoryImpl
+import com.berkang.storyteler.domain.repository.StoryHistoryRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,4 +28,10 @@ abstract class RepositoryModule {
     abstract fun bindStoryRepository(
         fakeStoryRepository: FakeStoryRepository
     ): StoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindStoryHistoryRepository(
+        storyHistoryRepositoryImpl: StoryHistoryRepositoryImpl
+    ): StoryHistoryRepository
 }

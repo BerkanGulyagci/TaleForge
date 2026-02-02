@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // 🔹 Navigation
     implementation(libs.navigation.compose)
@@ -75,6 +76,9 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+
+    // 🔹 Lottie
+    implementation(libs.lottie.compose)
 
     // 🔹 Test
     testImplementation(libs.junit)
@@ -88,4 +92,9 @@ dependencies {
     // 🔹 Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // 🔹 Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
 }

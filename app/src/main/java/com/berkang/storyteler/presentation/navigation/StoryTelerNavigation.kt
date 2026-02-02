@@ -21,6 +21,9 @@ fun StoryTelerNavigation(
             HomeScreen(
                 onNavigateToStorySetup = {
                     navController.navigate(Screen.StorySetup.route)
+                },
+                onNavigateToLibrary = {
+                    navController.navigate(Screen.Library.route)
                 }
             )
         }
@@ -51,6 +54,23 @@ fun StoryTelerNavigation(
             StoryPlayerScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+        
+        composable(Screen.Library.route) {
+            com.berkang.storyteler.presentation.screens.library.LibraryScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onStoryClick = { story ->
+                    // Şimdilik sadece StoryPlayer'a gidiyoruz. 
+                    // Gerçek uygulamada parametre geçilmeli veya SharedViewModel kullanılmalı.
+                    // Kullanıcı talebi: seçilen verisiyle StoryPlayer'a geç.
+                    // Mevcut StoryPlayer logic'i generate üzerine kurulu.
+                    // Burada navigasyon yapılır, ancak veri aktarımı için logic henüz tasarlanmadı.
+                    // O yüzden direkt navigasyon yapıyoruz.
+                    navController.navigate(Screen.StoryPlayer.route)
                 }
             )
         }

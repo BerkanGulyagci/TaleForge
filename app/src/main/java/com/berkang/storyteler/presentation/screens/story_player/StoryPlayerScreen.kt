@@ -1,11 +1,14 @@
 package com.berkang.storyteler.presentation.screens.story_player
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,14 +30,25 @@ fun StoryPlayerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Story Player") },
+                title = { 
+                    Text(
+                        text = "Masal Oynatıcı",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Geri")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -76,8 +90,10 @@ fun StoryPlayerScreen(
                     }
                 }
                 
-                uiState.error != null -> {
+                !uiState.error.isNullOrEmpty() -> {
                     // Error State
+                    val errorMessage = uiState.error ?: "Unknown error occurred"
+                    
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -102,7 +118,7 @@ fun StoryPlayerScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Text(
-                            text = uiState.error,
+                            text = errorMessage,
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -112,63 +128,107 @@ fun StoryPlayerScreen(
                 
                 uiState.story != null -> {
                     // Story Content State
+                    val story = uiState.story!!
+                    val sentences = uiState.sentences
+                    val currentIndex = uiState.currentSentenceIndex
+                    val listState = rememberLazyListState()
+                    
+                    // Otomatik scroll - currentSentenceIndex değiştiğinde
+                    LaunchedEffect(currentIndex) {
+                        if (currentIndex < sentences.size && sentences.isNotEmpty()) {
+                            listState.animateScrollToItem(currentIndex)
+                        }
+                    }
+                    
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         // Story Title Card
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
                             Column(
-                                modifier = Modifier.padding(20.dp),
+                                modifier = Modifier.padding(28.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
                                     text = "📖",
-                                    fontSize = 32.sp
+                                    fontSize = 48.sp
                                 )
                                 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
                                 
                                 Text(
-                                    text = uiState.story.title,
-                                    fontSize = 24.sp,
+                                    text = story.title,
+                                    style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     textAlign = TextAlign.Center
                                 )
                                 
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                                 
-                                Text(
-                                    text = "${uiState.story.genre.displayName} • ${uiState.story.length.displayName}",
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                                ) {
+                                    Text(
+                                        text = "${story.genre.displayName} • ${story.length.displayName}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                    )
+                                }
+                                
+                                // Progress Indicator - Modern Badge
+                                if (sentences.isNotEmpty() && currentIndex < sentences.size) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "📊",
+                                                fontSize = 18.sp
+                                            )
+                                            Text(
+                                                text = "${currentIndex + 1} / ${sentences.size} okunuyor",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                         
-                        // Story Content Card
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp)
+                        // Sentences List
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background),
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(20.dp)
-                            ) {
-                                Text(
-                                    text = uiState.story.content,
-                                    fontSize = 16.sp,
-                                    lineHeight = 24.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                            itemsIndexed(sentences) { index, sentence ->
+                                SentenceItem(
+                                    sentence = sentence,
+                                    isReading = index == currentIndex && uiState.isSpeaking,
+                                    isRead = index < currentIndex
                                 )
                             }
                         }
@@ -176,37 +236,116 @@ fun StoryPlayerScreen(
                         // Player Controls Card
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            )
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                         ) {
-                            Row(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(20.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly
+                                    .padding(24.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
+                                // Main Play/Stop Button
                                 Button(
-                                    onClick = { /* Play/Pause functionality will be added later */ },
-                                    modifier = Modifier.weight(1f)
+                                    onClick = {
+                                        if (uiState.isSpeaking) {
+                                            viewModel.stopStory()
+                                        } else {
+                                            viewModel.playStory()
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp),
+                                    shape = RoundedCornerShape(24.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (uiState.isSpeaking) 
+                                            MaterialTheme.colorScheme.error 
+                                        else 
+                                            MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(
+                                        defaultElevation = 6.dp,
+                                        pressedElevation = 3.dp
+                                    )
                                 ) {
-                                    Text("▶️ Play")
+                                    if (!uiState.isSpeaking) {
+                                        Icon(
+                                            imageVector = Icons.Filled.PlayArrow,
+                                            contentDescription = "Play",
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                    }
+                                    Text(
+                                        text = if (uiState.isSpeaking) "⏹️ Masalı Durdur" else "▶️ Masalı Oynat",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                // Save Button
+                                Button(
+                                    onClick = { viewModel.saveStory() },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    shape = RoundedCornerShape(24.dp),
+                                    enabled = !uiState.isSaved,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiary,
+                                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    elevation = ButtonDefaults.buttonElevation(
+                                        defaultElevation = 6.dp,
+                                        pressedElevation = 3.dp
+                                    )
+                                ) {
+                                    if (uiState.isSaved) {
+                                        Text(text = "✅ Kaydedildi", fontWeight = FontWeight.Bold)
+                                    } else {
+                                        Text(text = "💾 Kütüphaneye Kaydet", fontWeight = FontWeight.Bold)
+                                    }
                                 }
                                 
-                                Spacer(modifier = Modifier.width(12.dp))
-                                
-                                OutlinedButton(
-                                    onClick = { /* Stop functionality will be added later */ },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("⏹️ Stop")
+                                // Status Indicator
+                                if (uiState.isSpeaking) {
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            horizontalArrangement = Arrangement.Center,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                strokeWidth = 3.dp,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                text = "Masal okunuyor...",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
-                        
-                        // Add some bottom padding
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

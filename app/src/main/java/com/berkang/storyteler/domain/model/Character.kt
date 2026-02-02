@@ -5,6 +5,7 @@ data class Character(
     val name: String,
     val description: String,
     val imageRes: Int,
+    val animationRes: Int,
     val voiceType: VoiceType = VoiceType.FRIENDLY
 )
 
