@@ -1,9 +1,8 @@
 package com.berkang.storyteler.data.repository
 
-import com.berkang.storyteler.domain.model.Character
 import com.berkang.storyteler.domain.model.Story
-import com.berkang.storyteler.domain.model.StoryParams
-import com.berkang.storyteler.domain.model.StoryRequest
+import com.berkang.storyteler.domain.model.StoryGenre
+import com.berkang.storyteler.domain.model.StoryLength
 import com.berkang.storyteler.domain.repository.StoryRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -16,32 +15,25 @@ import javax.inject.Singleton
 class StoryRepositoryImpl @Inject constructor() : StoryRepository {
     
     private val stories = mutableListOf<Story>()
-    override suspend fun generateStory(
-        params: StoryParams,
-        character: Character
-    ): Story {
-        TODO("Not yet implemented")
-    }
 
-    override suspend fun generateStory(request: StoryRequest): Result<Story> {
+    override suspend fun generateStory(userPrompt: String): Story {
         return try {
             // Simüle edilmiş AI hikaye üretimi
             delay(2000) // 2 saniye bekleme
             
-            val story = Story(
+            Story(
                 id = UUID.randomUUID().toString(),
-                title = "${request.topic} Masalı",
-                content = generateSampleStoryContent(request),
-                genre = request.genre,
-                length = request.length,
-                targetAge = request.targetAge,
-                characterId = request.characterId,
-                isCompleted = false
+                title = "Story from RepositoryImpl",
+                content = "This is a sample story generated for prompt: $userPrompt\n\nOnce upon a time...",
+                genre = StoryGenre.ADVENTURE,
+                length = StoryLength.MEDIUM,
+                targetAge = 7,
+                characterId = "repo_impl_narrator",
+                isCompleted = false,
+                createdAt = System.currentTimeMillis()
             )
-            
-            Result.success(story)
         } catch (e: Exception) {
-            Result.failure(e)
+            throw e
         }
     }
     
@@ -70,19 +62,5 @@ class StoryRepositoryImpl @Inject constructor() : StoryRepository {
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-    
-    private fun generateSampleStoryContent(request: StoryRequest): String {
-        return """
-            Bir zamanlar, ${request.topic} hakkında güzel bir hikaye varmış...
-            
-            Bu hikaye ${request.genre.displayName.lowercase()} türünde ve ${request.targetAge} yaşındaki çocuklar için özel olarak hazırlanmış.
-            
-            Hikayemiz yaklaşık ${request.length.estimatedMinutes} dakika sürecek ve çok eğlenceli olacak!
-            
-            ${if (request.additionalNotes.isNotEmpty()) "Özel notlar: ${request.additionalNotes}" else ""}
-            
-            (Bu örnek bir hikaye içeriğidir. Gerçek uygulamada AI tarafından üretilecektir.)
-        """.trimIndent()
     }
 }

@@ -3,12 +3,12 @@ package com.berkang.storyteler.presentation.screens.story_player
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.berkang.storyteler.domain.model.Character
-import com.berkang.storyteler.domain.model.StoryParams
 import com.berkang.storyteler.domain.model.VoiceType
 import com.berkang.storyteler.domain.model.StoryHistory
 import com.berkang.storyteler.domain.usecase.GenerateStoryUseCase
 import com.berkang.storyteler.domain.usecase.SaveStoryHistoryUseCase
 import com.berkang.storyteler.presentation.screens.story_player.tts.TtsManager
+import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,16 +21,27 @@ import java.util.UUID
 class StoryPlayerViewModel @Inject constructor(
     private val generateStoryUseCase: GenerateStoryUseCase,
     private val saveStoryHistoryUseCase: SaveStoryHistoryUseCase,
-    private val ttsManager: TtsManager
+    private val historyRepository: com.berkang.storyteler.domain.repository.StoryHistoryRepository,
+    private val ttsManager: TtsManager,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(StoryPlayerUiState())
     val uiState: StateFlow<StoryPlayerUiState> = _uiState.asStateFlow()
     
     init {
-        generateSampleStory()
+        val promptArg = savedStateHandle.get<String>("prompt")
+        
+        if (promptArg != null && promptArg.startsWith("history:")) {
+            val historyId = promptArg.substringAfter("history:")
+            loadStoryFromHistory(historyId)
+        } else {
+            generateSampleStory(promptArg)
+        }
+        
         observeTtsState()
         setupTtsCallbacks()
+        ttsManager.prepare()
     }
     
     private fun observeTtsState() {
@@ -47,20 +58,56 @@ class StoryPlayerViewModel @Inject constructor(
         }
     }
     
-    private fun generateSampleStory() {
+    private fun loadStoryFromHistory(id: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            try {
+                val historyStory = historyRepository.getStoryById(id)
+                if (historyStory != null) {
+                    val story = com.berkang.storyteler.domain.model.Story(
+                        id = historyStory.id,
+                        title = historyStory.title,
+                        content = historyStory.content,
+                        // Diğer alanlar history'den veya varsayılan
+                        genre = com.berkang.storyteler.domain.model.StoryGenre.values().find { it.displayName == historyStory.genre } 
+                                ?: com.berkang.storyteler.domain.model.StoryGenre.ADVENTURE,
+                        isCompleted = true,
+                        createdAt = historyStory.createdAt
+                    )
+                    
+                    val sentences = splitIntoSentences(story.content)
+                    
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        story = story,
+                        sentences = sentences,
+                        currentSentenceIndex = 0,
+                        isSaved = true, // Zaten kayıtlı
+                        error = null
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "Kayıtlı masal bulunamadı."
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Masal yüklenirken hata: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    private fun generateSampleStory(promptArg: String?) {
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true, error = null)
                 
-                // Örnek parametreler (gerçek uygulamada navigation'dan gelecek)
-                val sampleParams = StoryParams(
-                    topic = "Uzay Macerası",
-                    genre = "Adventure",
-                    length = "Medium",
-                    targetAge = 7,
-                    notes = "Eğlenceli ve öğretici olsun"
-                )
-                
+                // Parametreleri Navigation'dan al
+                val userPrompt = promptArg ?: "Bilinmeyen Masal"
+
                 val sampleCharacter = Character(
                     id = "teddy_bear",
                     name = "Peluş Ayı",
@@ -70,7 +117,8 @@ class StoryPlayerViewModel @Inject constructor(
                     voiceType = VoiceType.FRIENDLY
                 )
                 
-                val story = generateStoryUseCase(sampleParams, sampleCharacter)
+                // AI ile masal üret
+                val story = generateStoryUseCase(userPrompt)
                 val sentences = splitIntoSentences(story.content)
                 
                 _uiState.value = _uiState.value.copy(

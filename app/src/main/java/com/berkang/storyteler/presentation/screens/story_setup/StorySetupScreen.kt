@@ -21,20 +21,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun StorySetupScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToCharacterSelect: () -> Unit,
+    onNavigateToStoryPlayer: (String) -> Unit,
     viewModel: StorySetupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
-    val genres = listOf("Adventure", "Fairy Tale", "Educational", "Funny", "Friendship")
-    val lengths = listOf("Short", "Medium", "Long")
     
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Masal Kurulumu",
+                        text = "Masal Oluştur",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
@@ -56,13 +53,13 @@ fun StorySetupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Topic Input
+            
+            // Prompt Input Card
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
@@ -70,274 +67,27 @@ fun StorySetupScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp)
+                    modifier = Modifier.padding(24.dp).fillMaxSize()
                 ) {
                     Text(
-                        text = "Masal Konusu",
+                        text = "Nasıl bir masal istersin?",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = uiState.topic,
-                        onValueChange = viewModel::updateTopic,
+                        value = uiState.prompt,
+                        onValueChange = viewModel::updatePrompt,
                         placeholder = { 
                             Text(
-                                "Örn: Uzay macerası, Büyülü orman...",
+                                "Örn: Uzayda kaybolan cesur bir astronot hakkında heyecanlı bir masal...",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             ) 
                         },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                        )
-                    )
-                }
-            }
-            
-            // Genre Selection
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Text(
-                        text = "Masal Türü",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Column(
-                        modifier = Modifier.selectableGroup(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        genres.forEach { genre ->
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = (uiState.genre == genre),
-                                        onClick = { viewModel.updateGenre(genre) },
-                                        role = Role.RadioButton
-                                    ),
-                                shape = RoundedCornerShape(16.dp),
-                                color = if (uiState.genre == genre) 
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                else 
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = (uiState.genre == genre),
-                                        onClick = null,
-                                        colors = RadioButtonDefaults.colors(
-                                            selectedColor = MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                    Text(
-                                        text = genre,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.padding(start = 8.dp),
-                                        fontWeight = if (uiState.genre == genre) FontWeight.SemiBold else FontWeight.Normal
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Length Selection
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Text(
-                        text = "Masal Uzunluğu",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Column(
-                        modifier = Modifier.selectableGroup(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        lengths.forEach { length ->
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = (uiState.length == length),
-                                        onClick = { viewModel.updateLength(length) },
-                                        role = Role.RadioButton
-                                    ),
-                                shape = RoundedCornerShape(16.dp),
-                                color = if (uiState.length == length) 
-                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                                else 
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(
-                                        selected = (uiState.length == length),
-                                        onClick = null,
-                                        colors = RadioButtonDefaults.colors(
-                                            selectedColor = MaterialTheme.colorScheme.secondary
-                                        )
-                                    )
-                                    Column(modifier = Modifier.padding(start = 8.dp)) {
-                                        Text(
-                                            text = length,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = if (uiState.length == length) FontWeight.SemiBold else FontWeight.Normal
-                                        )
-                                        Text(
-                                            text = when(length) {
-                                                "Short" -> "~3 dakika"
-                                                "Medium" -> "~7 dakika"
-                                                "Long" -> "~15 dakika"
-                                                else -> ""
-                                            },
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Target Age Slider
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Hedef Yaş",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.tertiaryContainer
-                        ) {
-                            Text(
-                                text = "${uiState.targetAge} yaş",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Slider(
-                        value = uiState.targetAge.toFloat(),
-                        onValueChange = { viewModel.updateTargetAge(it.toInt()) },
-                        valueRange = 3f..12f,
-                        steps = 8,
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        )
-                    )
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            "3 yaş", 
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            "12 yaş", 
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-            
-            // Additional Notes
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Text(
-                        text = "Ek Notlar (İsteğe Bağlı)",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = uiState.notes,
-                        onValueChange = viewModel::updateNotes,
-                        placeholder = { 
-                            Text(
-                                "Özel istekleriniz varsa yazın...",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            ) 
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -351,7 +101,7 @@ fun StorySetupScreen(
             
             // Continue Button
             Button(
-                onClick = onNavigateToCharacterSelect,
+                onClick = { onNavigateToStoryPlayer(uiState.prompt) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp),
@@ -370,7 +120,7 @@ fun StorySetupScreen(
                 )
             ) {
                 Text(
-                    text = "Karakter Seçimine Devam Et",
+                    text = "Masalımı Oluştur",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

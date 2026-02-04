@@ -27,17 +27,49 @@ class TtsManager @Inject constructor(
         initializeTts()
     }
     
+    fun prepare() {
+        if (!isInitialized || textToSpeech == null) {
+            initializeTts()
+        }
+    }
+
     private fun initializeTts() {
+        if (textToSpeech != null) return // Zaten init edilmişse tekrar etme
+        
         textToSpeech = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 textToSpeech?.let { tts ->
-                    val result = tts.setLanguage(Locale("tr", "TR"))
+                    val locale = Locale("tr", "TR")
+                    val result = tts.setLanguage(locale)
+                    
                     if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         tts.setLanguage(Locale.getDefault())
+                    } else {
+                        // Daha iyi bir ses tonu bulmaya çalış
+                        try {
+                            val voices = tts.voices
+                            if (voices != null) {
+                                // Türkçe sesleri filtrele
+                                val trVoices = voices.filter { it.locale.language == "tr" }
+                                
+                                // Varsa "network" (genellikle daha kaliteli) sesleri tercih et
+                                val bestVoice = trVoices.find { it.name.contains("network", ignoreCase = true) } 
+                                    ?: trVoices.find { !it.isNetworkConnectionRequired } // Yoksa offline kalite
+                                    ?: trVoices.firstOrNull()
+                                
+                                bestVoice?.let {
+                                    tts.voice = it
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // Ses seçimi başarısız olursa varsayılan ile devam et
+                            e.printStackTrace()
+                        }
                     }
                     
-                    tts.setSpeechRate(0.85f)
-                    tts.setPitch(1.0f)
+                    // Masal anlatıcısı için ton ayarları
+                    tts.setSpeechRate(0.9f) // Biraz yavaş, anlaşılır
+                    tts.setPitch(1.0f)      // Doğal ton
                     
                     tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                         override fun onStart(utteranceId: String?) {

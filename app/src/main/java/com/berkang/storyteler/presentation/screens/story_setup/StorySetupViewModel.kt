@@ -13,26 +13,10 @@ class StorySetupViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(StorySetupUiState())
     val uiState: StateFlow<StorySetupUiState> = _uiState.asStateFlow()
     
-    fun updateTopic(topic: String) {
+    fun updatePrompt(prompt: String) {
         _uiState.value = _uiState.value.copy(
-            topic = topic,
-            isValid = topic.isNotBlank()
+            prompt = prompt,
+            isValid = prompt.isNotBlank()
         )
-    }
-    
-    fun updateGenre(genre: String) {
-        _uiState.value = _uiState.value.copy(genre = genre)
-    }
-    
-    fun updateLength(length: String) {
-        _uiState.value = _uiState.value.copy(length = length)
-    }
-    
-    fun updateTargetAge(age: Int) {
-        _uiState.value = _uiState.value.copy(targetAge = age)
-    }
-    
-    fun updateNotes(notes: String) {
-        _uiState.value = _uiState.value.copy(notes = notes)
     }
 }

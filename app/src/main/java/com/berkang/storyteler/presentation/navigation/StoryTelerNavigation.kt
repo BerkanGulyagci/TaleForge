@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.berkang.storyteler.presentation.screens.character_select.CharacterSelectScreen
 import com.berkang.storyteler.presentation.screens.home.HomeScreen
 import com.berkang.storyteler.presentation.screens.story_player.StoryPlayerScreen
 import com.berkang.storyteler.presentation.screens.story_setup.StorySetupScreen
@@ -19,8 +18,8 @@ fun StoryTelerNavigation(
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
-                onNavigateToStorySetup = {
-                    navController.navigate(Screen.StorySetup.route)
+                onNavigateToStoryPlayer = { prompt ->
+                    navController.navigate("${Screen.StoryPlayer.route}/$prompt")
                 },
                 onNavigateToLibrary = {
                     navController.navigate(Screen.Library.route)
@@ -33,24 +32,20 @@ fun StoryTelerNavigation(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onNavigateToCharacterSelect = {
-                    navController.navigate(Screen.CharacterSelect.route)
+                onNavigateToStoryPlayer = { prompt ->
+                    navController.navigate("${Screen.StoryPlayer.route}/$prompt")
                 }
             )
         }
         
-        composable(Screen.CharacterSelect.route) {
-            CharacterSelectScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToStoryPlayer = {
-                    navController.navigate(Screen.StoryPlayer.route)
-                }
-            )
-        }
+        /* CharacterSelect removed as per user request to simplify flow */
         
-        composable(Screen.StoryPlayer.route) {
+        composable(
+            route = "${Screen.StoryPlayer.route}/{prompt}",
+            arguments = listOf(
+                androidx.navigation.navArgument("prompt") { type = androidx.navigation.NavType.StringType }
+            )
+        ) {
             StoryPlayerScreen(
                 onNavigateBack = {
                     navController.popBackStack()
@@ -65,12 +60,8 @@ fun StoryTelerNavigation(
                 },
                 onStoryClick = { story ->
                     // Şimdilik sadece StoryPlayer'a gidiyoruz. 
-                    // Gerçek uygulamada parametre geçilmeli veya SharedViewModel kullanılmalı.
-                    // Kullanıcı talebi: seçilen verisiyle StoryPlayer'a geç.
-                    // Mevcut StoryPlayer logic'i generate üzerine kurulu.
-                    // Burada navigasyon yapılır, ancak veri aktarımı için logic henüz tasarlanmadı.
-                    // O yüzden direkt navigasyon yapıyoruz.
-                    navController.navigate(Screen.StoryPlayer.route)
+                    // Navigasyon: Saved story ID'sini gönder
+                    navController.navigate("${Screen.StoryPlayer.route}/history:${story.id}")
                 }
             )
         }

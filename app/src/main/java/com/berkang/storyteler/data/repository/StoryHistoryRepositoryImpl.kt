@@ -25,16 +25,23 @@ class StoryHistoryRepositoryImpl @Inject constructor(
 
     override suspend fun getStories(): List<StoryHistory> {
         val entities = dao.getAll()
-        return entities.map { entity ->
-            StoryHistory(
-                id = entity.id,
-                title = entity.title,
-                content = entity.content,
-                characterName = entity.characterName,
-                characterAnimationRes = entity.characterAnimationRes,
-                genre = entity.genre,
-                createdAt = entity.createdAt
-            )
-        }
+        return entities.map { entity -> mapEntityToDomain(entity) }
+    }
+
+    override suspend fun getStoryById(id: String): StoryHistory? {
+        val entity = dao.getById(id)
+        return entity?.let { mapEntityToDomain(it) }
+    }
+
+    private fun mapEntityToDomain(entity: StoryHistoryEntity): StoryHistory {
+        return StoryHistory(
+            id = entity.id,
+            title = entity.title,
+            content = entity.content,
+            characterName = entity.characterName,
+            characterAnimationRes = entity.characterAnimationRes,
+            genre = entity.genre,
+            createdAt = entity.createdAt
+        )
     }
 }

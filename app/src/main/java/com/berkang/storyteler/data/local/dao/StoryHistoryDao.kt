@@ -13,4 +13,7 @@ interface StoryHistoryDao {
 
     @Query("SELECT * FROM story_history ORDER BY createdAt DESC")
     suspend fun getAll(): List<StoryHistoryEntity>
+
+    @Query("SELECT * FROM story_history WHERE id = :id")
+    suspend fun getById(id: String): StoryHistoryEntity?
 }
